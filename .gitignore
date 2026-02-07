@@ -23,9 +23,13 @@ profile.cov
 # Go workspace file
 go.work
 go.work.sum
-# env file
-.env
-backend-uhs/.air.toml
+
+# backend related
+backend/.env
+backend/.air.toml
+backend/tmp
+backend/*.db
+
 # Editor/IDE
 # .idea/
 # .vscode/
