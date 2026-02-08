@@ -18,16 +18,17 @@ func main() {
 	}
 	cfg := config.LoadConfig()
 	app := echo.New()
+	// Middlewares
 	app.Use(middleware.RequestLogger())
+	app.Use(middleware.Recover())
+	// Groups
 	api := app.Group("/api")
-
 	// DB Connection
 	db, err := repository.New(cfg.SqliteDBPath, app)
 	if err != nil {
 		app.Logger.Error("Failed to connect to database")
 		os.Exit(1)
 	}
-
 	// Routes
 	routes.SetupRoutes(api, db)
 

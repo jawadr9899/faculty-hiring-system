@@ -13,8 +13,8 @@ type AuthService interface {
 }
 
 type CustomJWTClaims struct {
-	UserId   string `json:"id"`
-	UserName string `json:"name"`
+	UserId   string `json:"userid"`
+	UserName string `json:"username"`
 	jwt.RegisteredClaims
 }
 
