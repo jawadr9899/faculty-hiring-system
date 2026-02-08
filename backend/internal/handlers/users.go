@@ -75,7 +75,7 @@ func Signup(db *repository.Sqlite) func(c *echo.Context) error {
 func Login(db *repository.Sqlite) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		var user types.UserLogin
-		err := echo.BindBody(c, user)
+		err := echo.BindBody(c, &user)
 		if err != nil {
 			c.Logger().Error("No body found in request")
 			return err

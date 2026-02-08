@@ -18,9 +18,9 @@ type CustomJWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewCustomClaims(userId string, userName string,exp time.Time) *CustomJWTClaims {
+func NewCustomClaims(userId string, userName string, exp time.Time) *CustomJWTClaims {
 	return &CustomJWTClaims{
-		UserId: userId,
+		UserId:   userId,
 		UserName: userName,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(exp),
@@ -30,7 +30,7 @@ func NewCustomClaims(userId string, userName string,exp time.Time) *CustomJWTCla
 
 func (claims *CustomJWTClaims) GenerateToken() (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	encoded_token, err := token.SignedString(config.GetEnv("JWT_SECRET", "JON_SNOW"))
+	encoded_token, err := token.SignedString([]byte(config.GetEnv("JWT_SECRET", "JON_SNOW")))
 
 	if err != nil {
 		log.Fatalf("Failed to generate the jwt token %s", err)
