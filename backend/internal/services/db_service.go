@@ -27,7 +27,7 @@ func SetupDB(app *echo.Echo, cfg *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 	// migrations
-	db.AutoMigrate(&models.User{}, &models.Analytics{})
+	db.AutoMigrate(&models.User{}, &models.Analytics{}, &models.Application{}, &models.Position{}, &models.Cv{})
 	return db, nil
 }
 

@@ -2,17 +2,17 @@ package handlers
 
 import (
 	"net/http"
-	"uhs/internal/models"
 	"uhs/internal/responses"
 	"uhs/internal/services"
 	"uhs/internal/types"
+	"uhs/internal/utils"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
 )
 
-func SaveAnalytics(analyticsOps types.AnalyticsOps, pdfOps types.PDFOps) func(c *echo.Context) error {
+func SaveAnalytics(analyticsOps types.AnalyticsOps, pdfOps types.PDFOps, aiOps types.AIOps, cvOps types.CvOps) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		// extract token
 		token, err := echo.ContextGet[*jwt.Token](c, "user")
@@ -25,33 +25,32 @@ func SaveAnalytics(analyticsOps types.AnalyticsOps, pdfOps types.PDFOps) func(c 
 			})
 		}
 		user := token.Claims.(*services.CustomJWTClaims)
-		// extract body
-		var analytics models.Analytics
-		echo.BindBody(c, &analytics)
-		// bind id
-		analytics.Id = uuid.NewString()
-		analytics.UserId = user.UserId
-
+		// find CV
+		cv := cvOps.GetEntitiesWhere("user_id = ?", user.UserId)
+		if len(cv) == 0 {
+			c.Logger().Error("No such user found ")
+			return c.JSON(http.StatusUnauthorized, &responses.DefaultResponse{
+				Status:  http.StatusUnauthorized,
+				Success: false,
+				Message: "Invalid or Missing JWT",
+			})
+		}
 		// initiate
-		err = pdfOps.ProcessPDF(c)
+		text, err := pdfOps.ExtractText(c, cv[0].FileUrl)
 		if err != nil {
-			c.Logger().Error("Failed to process pdf " + err.Error())
+			c.Logger().Error("Failed to extrac pdf text" + err.Error())
 			return c.JSON(http.StatusInternalServerError, &responses.DefaultResponse{
 				Status:  http.StatusInternalServerError,
 				Success: false,
 				Message: "Failed to process pdf",
 			})
 		}
-		text, err := pdfOps.ExtractText(c)
-		if err != nil {
-			c.Logger().Error("Failed to process the text of pdf " + err.Error())
 
-			return c.JSON(http.StatusInternalServerError, &responses.DefaultResponse{
-				Status:  http.StatusInternalServerError,
-				Success: false,
-				Message: "Failed to process text of pdf",
-			})
-		}
+		// ai
+		analytics, err := aiOps.ProcessCV(c, utils.GetPrompt("The Job is about Lab Engineer", text))
+		// bind omitted values
+		analytics.Id = uuid.NewString()
+		analytics.UserId = user.UserId
 
 		// save to db
 		err = analyticsOps.CreateEntity(&analytics)
@@ -66,7 +65,7 @@ func SaveAnalytics(analyticsOps types.AnalyticsOps, pdfOps types.PDFOps) func(c 
 		return c.JSON(http.StatusOK, &responses.DefaultResponse{
 			Status:  200,
 			Success: true,
-			Message: map[string]any{"analytics": analytics, "extract": text},
+			Message: map[string]any{"analytics": analytics},
 		})
 	}
 }

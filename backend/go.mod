@@ -3,10 +3,11 @@ module uhs
 go 1.25.7
 
 require (
-	github.com/glebarez/go-sqlite v1.22.0
+	github.com/AbdullahAlzariqi/pdf v1.0.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
+	github.com/hedgeg0d/groq v0.5.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo-jwt/v5 v5.0.0
 	github.com/labstack/echo/v5 v5.0.3
@@ -15,8 +16,8 @@ require (
 )
 
 require (
-	github.com/AbdullahAlzariqi/pdf v1.0.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

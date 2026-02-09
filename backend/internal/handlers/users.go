@@ -3,19 +3,21 @@ package handlers
 import (
 	"net/http"
 	"time"
+	"uhs/internal/config"
 	"uhs/internal/models"
 	"uhs/internal/responses"
 	"uhs/internal/services"
 	"uhs/internal/types"
+	"uhs/internal/utils"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func GetUsers(userModel types.UserOps) func(c *echo.Context) error {
+func GetUsers(userOps types.UserOps) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
-		users, err := userModel.GetEntities()
+		users, err := userOps.GetEntities()
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, &responses.DefaultResponse{
 				Status:  http.StatusInternalServerError,
@@ -23,25 +25,57 @@ func GetUsers(userModel types.UserOps) func(c *echo.Context) error {
 				Message: err,
 			})
 		}
-		return responses.JsonResponse(c, http.StatusOK, users...)
+		return c.JSON(http.StatusOK, users)
 	}
 
 }
 
-func Signup(userModel types.UserOps) func(c *echo.Context) error {
+func Signup(userOps types.UserOps, cvOps types.CvOps, cfg *config.Config) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		var user models.User
-		err := echo.BindBody(c, &user)
+		user.Id = uuid.NewString()
+		user.Name = c.FormValue("name")
+		user.Email = c.FormValue("email")
+		user.Password = c.FormValue("password")
+		
+		// get cv file from multipart
+		file, err := c.FormFile("file")
 		if err != nil {
-			c.Logger().Error("Failed to post user")
+			c.Logger().Error("Failed to retrieve file from multipart " + err.Error())
 			return c.JSON(http.StatusBadRequest, responses.DefaultResponse{
 				Status:  http.StatusBadRequest,
 				Success: false,
 				Message: err,
 			})
 		}
+		// save it to server
+		savedPath, err := utils.SaveFileInServer(c, file, cfg)
+		if err != nil {
+			c.Logger().Error("Failed to save file to server " + err.Error())
+			return c.JSON(http.StatusInternalServerError, responses.DefaultResponse{
+				Status:  http.StatusInternalServerError,
+				Success: false,
+				Message: err,
+			})
+		}
+		// Save file info to file database
+		err = cvOps.CreateEntity(&models.Cv{
+			Id:       uuid.NewString(),
+			UserId:   user.Id,
+			FileName: file.Filename,
+			FileUrl:  savedPath,
+		})
+		if err != nil {
+			c.Logger().Error("Failed to save file info to file database " + err.Error())
+			return c.JSON(http.StatusInternalServerError, responses.DefaultResponse{
+				Status:  http.StatusInternalServerError,
+				Success: false,
+				Message: err,
+			})
+		}
+
 		// check if user already exists in database
-		usersList := userModel.GetEntitiesWhere("email = ?", user.Email)
+		usersList := userOps.GetEntitiesWhere("email = ?", user.Email)
 		if len(usersList) > 0 {
 			c.Logger().Error("User already exists")
 			return c.JSON(http.StatusBadRequest, responses.DefaultResponse{
@@ -50,8 +84,7 @@ func Signup(userModel types.UserOps) func(c *echo.Context) error {
 				Message: "User already exists",
 			})
 		}
-		// generate id for user
-		user.Id = uuid.NewString()
+	
 		// hash password
 		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -59,8 +92,7 @@ func Signup(userModel types.UserOps) func(c *echo.Context) error {
 			return err
 		}
 		user.Password = string(hash)
-
-		err = userModel.CreateEntity(&user)
+		err = userOps.CreateEntity(&user)
 		if err != nil {
 			c.Logger().Error("Database failed to put user")
 			return c.JSON(http.StatusBadRequest, responses.DefaultResponse{
@@ -69,11 +101,11 @@ func Signup(userModel types.UserOps) func(c *echo.Context) error {
 				Message: err.Error(),
 			})
 		}
-		return responses.JsonResponse(c, http.StatusOK, user)
+		return c.JSON(http.StatusOK, user)
 	}
 }
 
-func Login(userModel types.UserOps) func(c *echo.Context) error {
+func Login(userOps types.UserOps) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		var user models.User
 		err := echo.BindBody(c, &user)
@@ -82,7 +114,7 @@ func Login(userModel types.UserOps) func(c *echo.Context) error {
 			return err
 		}
 		// check if user exists or not in database
-		usersList := userModel.GetEntitiesWhere("email = ?", user.Email)
+		usersList := userOps.GetEntitiesWhere("email = ?", user.Email)
 		if len(usersList) == 0 {
 			c.Logger().Error("User doesn't exist")
 			return c.JSON(http.StatusBadRequest, responses.DefaultResponse{
