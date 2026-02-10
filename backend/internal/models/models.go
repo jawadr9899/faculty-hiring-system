@@ -52,7 +52,7 @@ type Analytics struct {
 
 type Position struct {
 	Id          string        `gorm:"primaryKey" json:"id"`
-	Name        string        `gorm:"not null;" json:"name"`
+	Title       string        `gorm:"not null;" json:"title"`
 	Description string        `gorm:"not null;" json:"description"`
 	Application []Application `gorm:"foriegnKey:PositionId;references:Id;constraint:onUpdate:CASCADE,onDelete:CASCADE;" json:"-"`
 	Analytics   []Analytics   `gorm:"foriegnKey:PositionId;references:Id;constraint:onUpdate:CASCADE,onDelete:CASCADE;" json:"-"`

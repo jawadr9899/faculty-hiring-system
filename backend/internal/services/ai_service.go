@@ -29,12 +29,16 @@ func (ai *AIService) ProcessCV(c *echo.Context, prompt string) (models.Analytics
 		ApiKey: ai.APIKey,
 		Model:  ai.Model,
 	}
-	resp, _ := client.Ask(prompt)
+	resp, err := client.Ask(prompt)
+	if err != nil {
+		return models.Analytics{}, err
+	}
 
 	var aiAnalytics models.Analytics
-	err := json.Unmarshal([]byte(resp), &aiAnalytics)
+	err = json.Unmarshal([]byte(resp), &aiAnalytics)
 	if err != nil {
 		c.Logger().Error("Failed to convert the Ai Analytics to DB model " + err.Error())
+		
 		return models.Analytics{}, err
 	}
 

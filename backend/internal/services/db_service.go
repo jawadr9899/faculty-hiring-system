@@ -96,6 +96,7 @@ func (db *Database[T]) GetEntityByID(id string) (T, error) {
 	return entity, err
 }
 
+
 func (db *Database[T]) GetEntitiesWhere(query string, placeholders ...any) []T {
 	var entities []T
 	db.Db.Where(query, placeholders...).Find(&entities)
