@@ -34,7 +34,7 @@ func Authorize() echo.MiddlewareFunc {
 				})
 			}
 			if token.Role != common.AdminRole {
-				c.Logger().Error("Unauthorized, Failed user trying to access admin")
+				c.Logger().Error("Unauthorized & Failed, user trying to access admin")
 				return c.JSON(http.StatusForbidden, responses.DefaultResponse{
 					Status:  http.StatusForbidden,
 					Success: false,

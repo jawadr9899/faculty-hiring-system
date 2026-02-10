@@ -31,7 +31,7 @@ func SetupRoutes(cfg *config.Config, api *echo.Group, db *gorm.DB) {
 	// protected routes for user
 	usersApi.GET("/application/:posId", handlers.SubmitApplication(applicationServiceOps, positionServiceOps, cvServiceOps, pdfServiceOps, aiServiceOps, analyticsServiceOps), middleware.Authenticate(cfg))
 	// protected routes for admin
-	usersApi.POST("/analytics/:posId", handlers.GetAllAnalytics(analyticsServiceOps), middleware.Authorize())
+	usersApi.GET("/analytics", handlers.GetAllAnalytics(analyticsServiceOps), middleware.Authenticate(cfg), middleware.Authorize())
 	posApi := api.Group("/position")
 	// job posting related routes
 	posApi.GET("/all", handlers.GetPositions(positionServiceOps))

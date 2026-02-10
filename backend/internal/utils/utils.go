@@ -83,7 +83,8 @@ func GetPrompt(jobDesc string, cvStr string) string {
 }`, jobDesc, cvStr)
 
 }
-
+// Saving files on server
+// Mainly files are stored in cloud like in AWS S3 Bucketss, Cloudinary etc.
 // Returns the path where the file is saved
 func SaveFileInServer(c *echo.Context, file *multipart.FileHeader, cfg *config.Config) (string, error) {
 	src, err := file.Open()

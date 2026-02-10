@@ -93,6 +93,7 @@ func Signup(userOps types.UserOps, cvOps types.CvOps, cfg *config.Config) func(c
 			return err
 		}
 		user.Password = string(hash)
+		user.Role = common.UserRole
 		err = userOps.CreateEntity(&user)
 		if err != nil {
 			c.Logger().Error("Database failed to put user")
@@ -124,8 +125,9 @@ func Login(userOps types.UserOps) func(c *echo.Context) error {
 				Message: "Invalid credentials",
 			})
 		}
+		retrievedUser := usersList[0]
 		// check the hash
-		err = bcrypt.CompareHashAndPassword([]byte(usersList[0].Password), []byte(user.Password))
+		err = bcrypt.CompareHashAndPassword([]byte(retrievedUser.Password), []byte(user.Password))
 		if err != nil {
 			c.Logger().Error("Invalid credentials")
 			return c.JSON(http.StatusBadRequest, responses.DefaultResponse{
@@ -136,13 +138,13 @@ func Login(userOps types.UserOps) func(c *echo.Context) error {
 		}
 		// assign role & generate jwt token
 		var role common.Role
-		if usersList[0].Role == common.AdminRole {
+		if retrievedUser.Role == common.AdminRole {
 			role = common.AdminRole
 		} else {
 			role = common.UserRole
 		}
 
-		claims := services.NewCustomClaims(usersList[0].Id, usersList[0].Email, role, time.Now().Add(time.Minute*15))
+		claims := services.NewCustomClaims(retrievedUser.Id, retrievedUser.Email, role, time.Now().Add(time.Minute*15))
 		token, err := claims.GenerateToken()
 
 		if err != nil {
