@@ -9,6 +9,8 @@ type Config struct {
 	AiApiKey   string
 	AiApiModel string
 	UploadsPath string
+	AdminPassword string
+	AdminEmail string
 }
 
 func LoadConfig() *Config {
@@ -19,6 +21,8 @@ func LoadConfig() *Config {
 		AiApiKey:   GetEnv("AI_API_KEY", "DEFAULT_AI_API_KEY"),
 		AiApiModel: GetEnv("AI_API_MODEL", "DEFAULT_AI_MODEL"),
 		UploadsPath: GetEnv("UPLOADS_PATH", "DEFAULT_UPLOADS_PATH"),
+		AdminEmail: GetEnv("ADMIN_EMAIL", "DEFAUL_ADMIN_EMAIL"),
+		AdminPassword: GetEnv("ADMIN_PASSWORD", "DEFAUL_ADMIN_PASSWORD"),
 
 	}
 }

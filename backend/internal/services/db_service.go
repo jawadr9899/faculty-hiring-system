@@ -3,9 +3,12 @@ package services
 import (
 	"uhs/internal/config"
 	"uhs/internal/models"
+	"uhs/internal/types/common"
 
 	"github.com/glebarez/sqlite"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -28,6 +31,12 @@ func SetupDB(app *echo.Echo, cfg *config.Config) (*gorm.DB, error) {
 	}
 	// migrations
 	db.AutoMigrate(&models.User{}, &models.Analytics{}, &models.Application{}, &models.Position{}, &models.Cv{})
+	// set admin
+
+	if err := saveAdmin(app, db, cfg); err != nil {
+		app.Logger.Error("Failed to create admin user")
+		return nil, err
+	}
 	return db, nil
 }
 
@@ -35,6 +44,39 @@ func NewDatabaseService[T any](db *gorm.DB) DatabaseOperations[T] {
 	return &Database[T]{
 		Db: db,
 	}
+}
+
+// Sets Admin
+func saveAdmin(app *echo.Echo, db *gorm.DB, cfg *config.Config) error {
+	var adminCount int64
+	db.Model(&models.User{}).Where("role = ?", "admin").Count(&adminCount)
+
+	if adminCount > 0 {
+		app.Logger.Info("Admin already exists with count ")
+		return nil
+	}
+
+	adminUUID := uuid.NewString()
+	hash, err := bcrypt.GenerateFromPassword([]byte(cfg.AdminPassword), bcrypt.DefaultCost)
+	if err != nil {
+		app.Logger.Error("Failed to hash the password of admin")
+		return err
+	}
+
+	admin := &models.User{
+		Id:       adminUUID,
+		Name:     "admin",
+		Email:    cfg.AdminEmail,
+		Password: string(hash),
+		Role:     common.AdminRole,
+	}
+
+	err = db.Create(&admin).Error
+	if err != nil {
+		app.Logger.Error("Failed to save admin in database")
+		return err
+	}
+	return nil
 }
 
 // Generic functions

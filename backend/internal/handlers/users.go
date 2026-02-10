@@ -8,6 +8,7 @@ import (
 	"uhs/internal/responses"
 	"uhs/internal/services"
 	"uhs/internal/types"
+	"uhs/internal/types/common"
 	"uhs/internal/utils"
 
 	"github.com/google/uuid"
@@ -37,7 +38,7 @@ func Signup(userOps types.UserOps, cvOps types.CvOps, cfg *config.Config) func(c
 		user.Name = c.FormValue("name")
 		user.Email = c.FormValue("email")
 		user.Password = c.FormValue("password")
-		
+
 		// get cv file from multipart
 		file, err := c.FormFile("file")
 		if err != nil {
@@ -84,7 +85,7 @@ func Signup(userOps types.UserOps, cvOps types.CvOps, cfg *config.Config) func(c
 				Message: "User already exists",
 			})
 		}
-	
+
 		// hash password
 		hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -133,8 +134,15 @@ func Login(userOps types.UserOps) func(c *echo.Context) error {
 				Message: "Invalid credentials",
 			})
 		}
-		// generate jwt token
-		claims := services.NewCustomClaims(usersList[0].Id, usersList[0].Email, time.Now().Add(time.Minute*15))
+		// assign role & generate jwt token
+		var role common.Role
+		if usersList[0].Role == common.AdminRole {
+			role = common.AdminRole
+		} else {
+			role = common.UserRole
+		}
+
+		claims := services.NewCustomClaims(usersList[0].Id, usersList[0].Email, role, time.Now().Add(time.Minute*15))
 		token, err := claims.GenerateToken()
 
 		if err != nil {

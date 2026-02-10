@@ -1,6 +1,6 @@
 package types
 
-type UserLogin struct  {
-	Email string `json:"email"`
+type UserLogin struct {
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }

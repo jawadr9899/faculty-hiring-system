@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"time"
+	"uhs/internal/types/common"
+)
 
 type Timestamps struct {
 	CreatedAt time.Time
@@ -11,6 +14,7 @@ type User struct {
 	Id          string        `gorm:"primaryKey;" json:"id"`
 	Name        string        `json:"name"`
 	Email       string        `json:"email"`
+	Role        common.Role   `json:"-"`
 	Password    string        `json:"password"`
 	Analytics   Analytics     `gorm:"foreignKey:UserId;references:Id;constraint:onUpdate:CASCADE,onDelete:CASCADE;" json:"-"`
 	Application []Application `gorm:"foriegnKey:UserId;references:Id;" json:"-"`
@@ -28,7 +32,8 @@ type Cv struct {
 
 type Analytics struct {
 	Id               string `gorm:"primaryKey;" json:"id"`
-	UserId           string `gorm:"not null"`
+	UserId           string `gorm:"not null;"    json:"useId"`
+	PositionId       string `gorm:"uniqueIndex;not null;"   json:"positionId"`
 	Dept             string `json:"dept"`
 	DegreeLevel      string `json:"degreeLevel"`
 	PublicationCount uint   `json:"publicationCount"`
@@ -42,8 +47,6 @@ type Analytics struct {
 	CompositeRank    uint   `json:"compositeRank"`
 	Summary          string `json:"summary"`
 
-	Position []Position `gorm:"many2many:analytics_positions;" json:"-"`
-
 	Timestamps
 }
 
@@ -52,6 +55,7 @@ type Position struct {
 	Name        string        `gorm:"not null;" json:"name"`
 	Description string        `gorm:"not null;" json:"description"`
 	Application []Application `gorm:"foriegnKey:PositionId;references:Id;constraint:onUpdate:CASCADE,onDelete:CASCADE;" json:"-"`
+	Analytics   []Analytics   `gorm:"foriegnKey:PositionId;references:Id;constraint:onUpdate:CASCADE,onDelete:CASCADE;" json:"-"`
 
 	Timestamps
 }
@@ -59,6 +63,6 @@ type Position struct {
 type Application struct {
 	Id         string `gorm:"primarykey;"`
 	UserId     string `gorm:"not null;"`
-	PositionId string `gorm:"not null"`
+	PositionId string `gorm:"uniqueIndex;not null"`
 	Timestamps
 }

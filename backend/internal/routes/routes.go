@@ -17,6 +17,7 @@ func SetupRoutes(cfg *config.Config, api *echo.Group, db *gorm.DB) {
 	analyticsServiceOps := services.NewDatabaseService[models.Analytics](db)
 	cvServiceOps := services.NewDatabaseService[models.Cv](db)
 	positionServiceOps := services.NewDatabaseService[models.Position](db)
+	applicationServiceOps := services.NewDatabaseService[models.Application](db)
 
 	// extra services
 	pdfServiceOps := services.NewPDFService()
@@ -27,9 +28,10 @@ func SetupRoutes(cfg *config.Config, api *echo.Group, db *gorm.DB) {
 	usersApi.GET("/all", handlers.GetUsers(userServiceOps), middleware.Authenticate(cfg))
 	usersApi.POST("/signup", handlers.Signup(userServiceOps, cvServiceOps, cfg))
 	usersApi.POST("/login", handlers.Login(userServiceOps))
-	// protected routes
-	usersApi.POST("/analytics", handlers.SaveAnalytics(analyticsServiceOps, pdfServiceOps, aiServiceOps, cvServiceOps), middleware.Authenticate(cfg))
-
+	// protected routes for user
+	usersApi.GET("/application/:posId", handlers.SubmitApplication(applicationServiceOps), middleware.Authenticate(cfg))
+	// protected routes for admin
+	usersApi.POST("/analytics/:posId", handlers.SaveAnalytics(analyticsServiceOps, pdfServiceOps, aiServiceOps, cvServiceOps, positionServiceOps), middleware.Authenticate(cfg))
 	posApi := api.Group("/position")
 	// job posting related routes
 	posApi.GET("/all", handlers.GetPositions(positionServiceOps))

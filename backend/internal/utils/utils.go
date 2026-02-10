@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
+// Builds Prompt for AI
 func GetPrompt(jobDesc string, cvStr string) string {
 	return fmt.Sprintf(`{
   "meta": {
@@ -82,17 +83,18 @@ func GetPrompt(jobDesc string, cvStr string) string {
 }`, jobDesc, cvStr)
 
 }
+
 // Returns the path where the file is saved
-func SaveFileInServer(c *echo.Context, file *multipart.FileHeader,cfg*config.Config) (string,error) {
+func SaveFileInServer(c *echo.Context, file *multipart.FileHeader, cfg *config.Config) (string, error) {
 	src, err := file.Open()
 	if err != nil {
 		c.Logger().Error("Failed to open file to be saved on server " + err.Error())
-		return "",err
+		return "", err
 	}
-	dsn, err := os.Create(cfg.UploadsPath+ "/" + file.Filename)
+	dsn, err := os.Create(cfg.UploadsPath + "/" + file.Filename)
 	if err != nil {
 		c.Logger().Error("Failed to save file to server " + err.Error())
-		return "",err
+		return "", err
 	}
 	defer dsn.Close()
 
@@ -101,5 +103,5 @@ func SaveFileInServer(c *echo.Context, file *multipart.FileHeader,cfg*config.Con
 		c.Logger().Error("Failed to write the file to the server")
 		return "", err
 	}
-	return cfg.UploadsPath+ "/" + file.Filename,nil
+	return cfg.UploadsPath + "/" + file.Filename, nil
 }

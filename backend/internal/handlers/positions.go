@@ -15,7 +15,7 @@ func GetPositions(positionOps types.PositionOps) func(c *echo.Context) error {
 		positions, err := positionOps.GetEntities()
 		if err != nil {
 			c.Logger().Error("Failed to get all positions " + err.Error())
-			return c.JSON(http.StatusInternalServerError, &responses.DefaultResponse{
+			return c.JSON(http.StatusUnauthorized, &responses.DefaultResponse{
 				Status:  http.StatusUnauthorized,
 				Success: false,
 				Message: "Invalid or Missing JWT",
