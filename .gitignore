@@ -35,7 +35,7 @@ tmp
 # frontend related
 frontend/bun.lock
 frontend/node_modules
-
+.vscode
 
 # Editor/IDE
 # .idea/
