@@ -1,4 +1,4 @@
 ## University Hiring System
 
-[!NOTE]
-Presently in development...
+> [!NOTE]
+> Presently in development...
