@@ -14,7 +14,7 @@ const StatsCard: React.FC<StatMetric> = ({ title, value, trend, icon: Icon, colo
         </span>
       )}
     </div>
-    <div className="text-2xl font-bold text-white mb-1">{value}</div>
+    <div className="text-2xl   font-bold text-white mb-1">{value}</div>
     <div className="text-sm text-slate-500">{title}</div>
   </div>
 );

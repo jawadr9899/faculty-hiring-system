@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Briefcase, Users, LayoutDashboard, Bell, Menu } from 'lucide-react';
 import Sidebar from "@/components/sidebar.dashboard"
 import StatsCard from "@/components/stats-card.dashboard";
-import { ActivityChart, DepartmentChart } from "@/components/analytics-charts.dashboard";
+import { PerformanceScoreChart, CompositeWeightChart } from "@/components/analytics-charts.dashboard";
 import JobsView from "@/components/job-views.dashboard";
 import CandidatesView from "@/components/candidates-view.dashboard"
 import { type Tab } from '@/types/types';
@@ -15,20 +15,19 @@ const AdminDashboard: React.FC = () => {
   const renderOverview = () => (
     <div className="space-y-6 animate-fadeIn">
       {/* Top Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatsCard title="Total Applications" value="1,293" trend="+12%" icon={Users} color="text-blue-500" />
         <StatsCard title="Active Jobs" value="24" trend="+4" icon={Briefcase} color="text-purple-500" />
-        <StatsCard title="Interviews Set" value="18" trend="+8%" icon={LayoutDashboard} color="text-emerald-500" />
         <StatsCard title="Avg Response" value="2 Days" icon={Bell} color="text-orange-500" />
       </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <ActivityChart />
+          <PerformanceScoreChart />
         </div>
         <div>
-          <DepartmentChart />
+          <CompositeWeightChart />
         </div>
       </div>
     </div>

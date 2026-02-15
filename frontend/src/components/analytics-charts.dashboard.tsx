@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   AreaChart, 
   Area, 
@@ -11,10 +10,24 @@ import {
   Pie,
   Sector
 } from 'recharts';
-import { type ChartDataPoint } from '@/types/types';
 
-// --- CUSTOM SHAPE RENDERER (Replaces <Cell>) ---
-// This function reads the 'fill' color directly from the data payload
+// Mock data based on your new fields
+const PERFORMANCE_DATA = [
+  { category: 'Academic', score: 85, rank: 2 },
+  { category: 'Research', score: 92, rank: 1 },
+  { category: 'Teaching', score: 78, rank: 5 },
+  { category: 'Industrial', score: 65, rank: 8 },
+  { category: 'Admin', score: 70, rank: 6 },
+  { category: 'Salary', score: 88, rank: 3 },
+];
+
+const SCORE_DISTRIBUTION = [
+  { name: 'Research', value: 35, fill: '#3b82f6' },
+  { name: 'Academic', value: 25, fill: '#8b5cf6' },
+  { name: 'Teaching', value: 20, fill: '#10b981' },
+  { name: 'Others', value: 20, fill: '#f59e0b' },
+];
+
 const renderActiveShape = (props: any) => {
   const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, payload } = props;
   return (
@@ -25,83 +38,76 @@ const renderActiveShape = (props: any) => {
       outerRadius={outerRadius}
       startAngle={startAngle}
       endAngle={endAngle}
-      fill={payload.fill} // <--- Color applied here
+      fill={payload.fill}
       stroke={payload.fill}
     />
   );
 };
 
-const ACTIVITY_DATA = [
-  { name: 'Mon', active: 400 },
-  { name: 'Tue', active: 300 },
-  { name: 'Wed', active: 200 },
-  { name: 'Thu', active: 278 },
-  { name: 'Fri', active: 189 },
-  { name: 'Sat', active: 239 },
-  { name: 'Sun', active: 349 },
-];
-
-const DEPARTMENT_DATA: ChartDataPoint[] = [
-  { name: 'Comp Sci', value: 45, fill: '#3b82f6' },
-  { name: 'Physics', value: 25, fill: '#8b5cf6' },
-  { name: 'Math', value: 20, fill: '#10b981' },
-  { name: 'Arts', value: 10, fill: '#f59e0b' },
-];
-
-export const ActivityChart = () => (
+export const PerformanceScoreChart = () => (
   <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 h-full">
-    <h3 className="text-lg font-semibold text-white mb-6">Application Activity</h3>
+    <div className="flex justify-between items-start mb-6">
+      <div>
+        <h3 className="text-lg font-semibold text-white">Score Analytics</h3>
+        <p className="text-xs text-slate-400">Composite Rank: #1 (Senior Research Level)</p>
+      </div>
+    </div>
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={ACTIVITY_DATA}>
+        <AreaChart data={PERFORMANCE_DATA}>
           <defs>
-            <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+            <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-          <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-          <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
+          <XAxis dataKey="category" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+          <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
           <Tooltip 
             contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
-            itemStyle={{ color: '#94a3b8' }}
           />
-          <Area type="monotone" dataKey="active" stroke="#3b82f6" fillOpacity={1} fill="url(#colorActive)" strokeWidth={3} />
+          <Area 
+            type="monotone" 
+            dataKey="score" 
+            stroke="#10b981" 
+            fillOpacity={1} 
+            fill="url(#scoreGradient)" 
+            strokeWidth={3} 
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>
   </div>
 );
 
-export const DepartmentChart = () => (
+export const CompositeWeightChart = () => (
   <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 h-full">
-    <h3 className="text-lg font-semibold text-white mb-6">By Department</h3>
+    <h3 className="text-lg font-semibold text-white mb-2">Composite Breakdown</h3>
+    <p className="text-xs text-slate-400 mb-6">Degree: PhD | Exp: 12 Years</p>
     <div className="h-[250px] w-full relative">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
-            data={DEPARTMENT_DATA}
+            data={SCORE_DISTRIBUTION}
             cx="50%"
             cy="50%"
             innerRadius={60}
             outerRadius={80}
-            paddingAngle={5}
+            paddingAngle={8}
             dataKey="value"
-            activeShape={renderActiveShape} // Uses custom shape
-            shape={renderActiveShape}       // Uses custom shape
+            shape={renderActiveShape}
             stroke="none"
           />
-          <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }} />
+          <Tooltip />
         </PieChart>
       </ResponsiveContainer>
       
-      {/* Legend built manually for better control */}
       <div className="flex flex-wrap justify-center gap-3 mt-4">
-        {DEPARTMENT_DATA.map((item, idx) => (
+        {SCORE_DISTRIBUTION.map((item, idx) => (
           <div key={idx} className="flex items-center gap-1.5 text-xs text-slate-400">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.fill }}></span>
-            {item.name}
+            {item.name} ({item.value}%)
           </div>
         ))}
       </div>

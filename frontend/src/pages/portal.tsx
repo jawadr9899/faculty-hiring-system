@@ -1,4 +1,3 @@
-import React from 'react';
 
 // Mock data to visualize the design better
 const jobs = Array.from({ length: 12 }, (_, i) => ({
